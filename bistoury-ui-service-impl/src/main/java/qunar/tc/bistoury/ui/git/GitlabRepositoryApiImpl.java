@@ -33,6 +33,8 @@ import qunar.tc.bistoury.ui.service.GitPrivateTokenService;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.MessageFormat;
 import java.util.Optional;
 
@@ -70,14 +72,22 @@ public class GitlabRepositoryApiImpl implements GitRepositoryApi {
         try {
             final GitlabAPI api = createGitlabApi();
             final GitlabProject project = api.getProject(projectId);
-            final Query query = new Query().append("file_path", filepath).append("ref", ref);
-            final String url = "/projects/" + project.getId() + "/repository/files" + query.toString();
+            final Query query = new Query().append("ref", ref);
+            final String url = "/projects/" + project.getId() + "/repository/files/" + sanitizePath(filepath) + query.toString();
             return ResultHelper.success(api.retrieve().to(url, GitlabFile.class));
         } catch (GitlabAPIException e) {
             Metrics.counter("connect_gitlab_error").inc();
             return ResultHelper.fail(-1, "连接gitlab服务器失败，请核private token", e);
         } catch (FileNotFoundException fnfe) {
             return ResultHelper.fail(-1, "文件不存在，请核对仓库地址", fnfe);
+        }
+    }
+
+    private String sanitizePath(String branch) {
+        try {
+            return URLEncoder.encode(branch, "UTF-8").replaceAll("\\+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException((e));
         }
     }
 

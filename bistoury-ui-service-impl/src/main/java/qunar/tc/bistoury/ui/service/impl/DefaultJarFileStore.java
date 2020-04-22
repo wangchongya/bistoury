@@ -81,6 +81,8 @@ public class DefaultJarFileStore implements JarFileStore {
 
     private int jarGuaranteePeriodDays;
 
+    private boolean checkMavenHash = false;//是否进行maven hash校验
+
     private LoadingCache<MavenInfo, String> cache;
 
     @PostConstruct
@@ -91,6 +93,7 @@ public class DefaultJarFileStore implements JarFileStore {
         dynamicConfig.addListener(config -> {
             mavenHost = config.getString("maven.nexus.url");
             jarGuaranteePeriodDays = config.getInt("jar.guarantee.period.days", 2);
+            checkMavenHash = config.getBoolean("maven.hash.check", false);
         });
 
         this.cache = CacheBuilder
@@ -200,23 +203,24 @@ public class DefaultJarFileStore implements JarFileStore {
                 try (FileOutputStream to = new FileOutputStream(tempFile)) {
                     ByteStreams.copy(inputStream, to);
                 }
+                if(checkMavenHash){
+                    //分析response Header，获取etag，解析文件hash
+                    String eTagInHeader = response.getHeader("ETag");
+                    ETag eTag = parseETag(eTagInHeader);
+                    if (eTag == null) {
+                        logger.error("文件 hash 值解析错误, mavenInfo: {}, etag: {}", mavenInfo, eTagInHeader);
+                        Metrics.counter("hash_parse_error").inc();
+                        tempFile.delete();
+                        throw new SourceFileNotFoundException("源文件下载错误, 文件hashValue值解析错误");
+                    }
 
-                //分析response Header，获取etag，解析文件hash
-                String eTagInHeader = response.getHeader("ETag");
-                ETag eTag = parseETag(eTagInHeader);
-                if (eTag == null) {
-                    logger.error("文件 hash 值解析错误, mavenInfo: {}, etag: {}", mavenInfo, eTagInHeader);
-                    Metrics.counter("hash_parse_error").inc();
-                    tempFile.delete();
-                    throw new SourceFileNotFoundException("源文件下载错误, 文件hashValue值解析错误");
-                }
-
-                String hashValue = eTag.hashing(tempFile);
-                if (!Objects.equals(eTag.getHashValue(), hashValue)) {
-                    logger.error("文件 hash 值不匹配, mavenInfo: {}, algorithm: {}, etag: {}, file: {}", mavenInfo, eTag.getAlgorithm().name(), eTag.getHashValue(), hashValue);
-                    Metrics.counter("hash_not_match").inc();
-                    tempFile.delete();
-                    throw new SourceFileNotFoundException(String.format("源文件下载错误，文件hashValue值不匹配, algorithm: %s, etag: %s, file: %s", eTag.getAlgorithm().name(), eTag.getHashValue(), hashValue));
+                    String hashValue = eTag.hashing(tempFile);
+                    if (!Objects.equals(eTag.getHashValue(), hashValue)) {
+                        logger.error("文件 hash 值不匹配, mavenInfo: {}, algorithm: {}, etag: {}, file: {}", mavenInfo, eTag.getAlgorithm().name(), eTag.getHashValue(), hashValue);
+                        Metrics.counter("hash_not_match").inc();
+                        tempFile.delete();
+                        throw new SourceFileNotFoundException(String.format("源文件下载错误，文件hashValue值不匹配, algorithm: %s, etag: %s, file: %s", eTag.getAlgorithm().name(), eTag.getHashValue(), hashValue));
+                    }
                 }
 
                 File jarFile = new File(getSourceJarPath(mavenInfo));
