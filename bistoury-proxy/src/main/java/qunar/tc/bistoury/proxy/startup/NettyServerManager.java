@@ -82,7 +82,10 @@ public class NettyServerManager {
     private List<AgentMessageProcessor> agentMessageProcessors;
 
     private volatile String uiNode;
-    private ZKClient zkClient;
+
+    @Autowired
+    private ZkManager zkManager;
+
     private Conf conf;
 
     int websocketPort = -1;
@@ -94,7 +97,7 @@ public class NettyServerManager {
 
     @PostConstruct
     public void start() {
-        zkClient = ZKClientCache.get(registryStore.getZkAddress());
+        zkManager.start();
         conf = Conf.fromMap(DynamicConfigLoader.load("global.properties").asMap());
 
         websocketPort = conf.getInt("server.port", -1);
@@ -111,7 +114,7 @@ public class NettyServerManager {
         offline();
         nettyServerForUi.stop();
         nettyServerForAgent.stop();
-        zkClient.close();
+        zkManager.stop();
     }
 
     private NettyServerForUi startUiServer(Conf conf) {
@@ -136,30 +139,13 @@ public class NettyServerManager {
     }
 
     private boolean deleteSelf() {
-        return deleteNode(uiNode);
+        return zkManager.deleteNode(uiNode);
     }
 
-    private boolean deleteNode(String... nodes) {
-        boolean ret = true;
-        for (String node : nodes) {
-            if (node != null) {
-                try {
-                    zkClient.deletePath(node);
-                    logger.info("zk delete successfully, node {}", node);
-                } catch (KeeperException.NoNodeException e) {
-                    // ignore
-                } catch (Exception e) {
-                    logger.error("zk delete path error", e);
-                    ret = false;
-                }
-            }
-        }
-        return ret;
-    }
 
     private void register() {
         registerUiNode();
-        zkClient.addConnectionChangeListener((sender, state) -> {
+        zkManager.addConnectionChangeListener((sender, state) -> {
             if (state == ConnectionState.RECONNECTED) {
                 deleteSelf();
                 registerUiNode();
@@ -167,23 +153,9 @@ public class NettyServerManager {
         });
     }
 
-    private String doRegister(String basePath, String node) {
-        try {
-            if (!zkClient.checkExist(basePath)) {
-                zkClient.addPersistentNode(basePath);
-            }
-            node = ZKPaths.makePath(basePath, node);
-            deleteNode(node);
-            zkClient.addEphemeralNode(node);
-            logger.info("zk register successfully, node {}", node);
-        } catch (Exception e) {
-            logger.error("zk register failed", e);
-        }
-        return node;
-    }
 
     private void registerUiNode() {
-        this.uiNode = doRegister(registryStore.getProxyZkPathForNewUi(), getIp() + ":" + tomcatPort + ":" + websocketPort);
+        this.uiNode = zkManager.doRegister(registryStore.getProxyZkPathForNewUi(), getIp() + ":" + tomcatPort + ":" + websocketPort);
     }
 
     private static String getIp() {

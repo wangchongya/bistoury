@@ -21,7 +21,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.MoreExecutors;
 import io.netty.channel.Channel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import qunar.tc.bistoury.proxy.startup.ZkManager;
+import qunar.tc.bistoury.serverside.store.RegistryStore;
 
 import java.util.Map;
 import java.util.Objects;
@@ -36,16 +39,24 @@ public class DefaultAgentConnectionStore implements AgentConnectionStore {
 
     private final ConcurrentMap<String, AgentConnection> connections = Maps.newConcurrentMap();
 
+    @Autowired
+    private ZkManager zkManager;
+
+    @Autowired
+    private RegistryStore registryStore;
+
     @Override
-    public AgentConnection register(String agentId, int agentVersion, Channel channel) {
-        DefaultAgentConnection agentConnection = new DefaultAgentConnection(agentId, agentVersion, channel);
+    public AgentConnection register(String agentId,String applicationName, int agentVersion, Channel channel) {
+        DefaultAgentConnection agentConnection = new DefaultAgentConnection(agentId,applicationName, agentVersion, channel);
         AgentConnection oldConnection = connections.get(agentId);
         if (!Objects.equals(oldConnection, agentConnection)) {
             oldConnection = connections.put(agentId, agentConnection);
             agentConnection.init();
+            zkManager.createOnlyLastEphemeralNode(registryStore.getAgentZkPath() + "/" + applicationName + "/" + agentId,true);
             agentConnection.closeFuture().addListener(() -> connections.remove(agentId, agentConnection), MoreExecutors.directExecutor());
             if (oldConnection != null && !Objects.equals(oldConnection, agentConnection)) {
                 oldConnection.close();
+                zkManager.deleteNode(registryStore.getAgentZkPath() + "/" + applicationName + "/" + agentId );
             }
             return agentConnection;
         } else {

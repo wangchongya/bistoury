@@ -27,7 +27,7 @@ import java.util.Optional;
  */
 public interface AgentConnectionStore {
 
-    AgentConnection register(String agentId, int agentVersion, Channel channel);
+    AgentConnection register(String agentId, String applicationName,int agentVersion, Channel channel);
 
     Optional<AgentConnection> getConnection(String agentId);
 

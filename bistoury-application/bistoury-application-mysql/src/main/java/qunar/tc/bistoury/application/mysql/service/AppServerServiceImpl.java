@@ -44,9 +44,14 @@ public class AppServerServiceImpl implements AppServerService {
     @Autowired
     private AppServerDao appServerDao;
 
+
+
+
     @Override
     public List<AppServer> getAppServerByAppCode(final String appCode) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(appCode), "app code cannot be null or empty");
+        //得到zk下所有 /bistoury/agent/${appCode} 节点
+
         return this.appServerDao.getAppServerByAppCode(appCode);
     }
 

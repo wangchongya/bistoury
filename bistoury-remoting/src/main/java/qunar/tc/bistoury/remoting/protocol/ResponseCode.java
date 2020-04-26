@@ -32,7 +32,8 @@ public enum ResponseCode {
     RESP_TYPE_EXCEPTION(-1, -1),
     RESP_TYPE_CONTENT(-2, 1),
     RESP_TYPE_SINGLE_END(-3, 2),
-    RESP_TYPE_ALL_END(-4, 3);
+    RESP_TYPE_ALL_END(-4, 3),
+    RESP_TYPE_ALL_BENGIN(-5, 4);//由于不知道
 
     private int code;
     private int oldCode;

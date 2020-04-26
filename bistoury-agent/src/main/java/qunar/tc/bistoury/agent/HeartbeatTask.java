@@ -18,6 +18,7 @@
 package qunar.tc.bistoury.agent;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import com.taobao.arthas.core.util.StringUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -28,6 +29,8 @@ import qunar.tc.bistoury.remoting.protocol.Datagram;
 import qunar.tc.bistoury.remoting.protocol.RemotingBuilder;
 import qunar.tc.bistoury.remoting.protocol.ResponseCode;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +52,16 @@ class HeartbeatTask {
     public HeartbeatTask(long heartbeatSec) {
         this.heartbeatSec = heartbeatSec;
         heartbeatRequest = RemotingBuilder.buildAgentRequest(ResponseCode.RESP_TYPE_HEARTBEAT.getCode(), null);
+
+        String applicationName = System.getProperty("applicationName");
+        if(!StringUtils.isBlank(applicationName)){
+            Map<String,String> pros = new HashMap<>();
+            pros.put("applicationName",applicationName);
+            heartbeatRequest.getHeader().setProperties(pros);
+        }else {
+            logger.warn("unknow -DapplicationName ERROR");
+        }
+
     }
 
     public void start(final Channel channel, final AtomicBoolean running) {

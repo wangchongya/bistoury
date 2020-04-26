@@ -27,6 +27,7 @@ import qunar.tc.bistoury.serverside.store.RegistryStore;
 import qunar.tc.bistoury.ui.service.ProxyService;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.List;
 
@@ -43,6 +44,11 @@ public class ProxyServiceImpl implements ProxyService {
     @PostConstruct
     public void init() {
         zkClient = ZKClientCache.get(registryStore.getZkAddress());
+    }
+
+    @PreDestroy
+    public void stop(){
+        zkClient.close();
     }
 
     @Override

@@ -31,7 +31,11 @@ public class RegistryStore {
 
     private static final String REGISTRY_CONFIG = "registry.properties";
 
-    private String newBaseRoot = "/bistoury/proxy/new/group/";
+    private String baseRoot = "/bistoury";
+
+    private String newBaseRoot = baseRoot + "/proxy/new/group/";
+
+    private String agentRoot;
 
     private String zkAddress;
 
@@ -43,6 +47,7 @@ public class RegistryStore {
         Map<String, String> registries = DynamicConfigLoader.load(REGISTRY_CONFIG).asMap();
         zkAddress = registries.get(DEFAULT_ZK);
         pathForNewUi = newBaseRoot + "ui";
+        agentRoot = baseRoot + "/agent";
     }
 
 
@@ -53,4 +58,9 @@ public class RegistryStore {
     public String getProxyZkPathForNewUi() {
         return pathForNewUi;
     }
+
+    public String getAgentZkPath() {
+        return agentRoot;
+    }
+
 }

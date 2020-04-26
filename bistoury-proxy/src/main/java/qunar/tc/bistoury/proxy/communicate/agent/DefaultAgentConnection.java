@@ -31,13 +31,16 @@ public class DefaultAgentConnection extends AbstractConnection implements AgentC
 
     private final int version;
 
+    private final String applicationName;
+
     private final Channel channel;
 
-    public DefaultAgentConnection(String agentId, int version, Channel channel) {
+    public DefaultAgentConnection(String agentId,String applicationName, int version, Channel channel) {
         super("agent", channel);
         this.agentId = agentId;
         this.version = version;
         this.channel = channel;
+        this.applicationName = applicationName;
     }
 
     @Override
@@ -62,11 +65,12 @@ public class DefaultAgentConnection extends AbstractConnection implements AgentC
         DefaultAgentConnection that = (DefaultAgentConnection) o;
         return version == that.version &&
                 Objects.equals(agentId, that.agentId) &&
-                Objects.equals(channel, that.channel);
+                Objects.equals(channel, that.channel) &&
+                Objects.equals(applicationName, that.applicationName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(agentId, version, channel);
+        return Objects.hash(agentId, version, channel,applicationName);
     }
 }
