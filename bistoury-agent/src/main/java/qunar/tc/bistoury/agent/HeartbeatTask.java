@@ -54,14 +54,16 @@ class HeartbeatTask {
         heartbeatRequest = RemotingBuilder.buildAgentRequest(ResponseCode.RESP_TYPE_HEARTBEAT.getCode(), null);
 
         String applicationName = System.getProperty("applicationName");
-        if(!StringUtils.isBlank(applicationName)){
-            Map<String,String> pros = new HashMap<>();
-            pros.put("applicationName",applicationName);
-            heartbeatRequest.getHeader().setProperties(pros);
-        }else {
-            logger.warn("unknow -DapplicationName ERROR");
+        if(StringUtils.isBlank(applicationName)){
+            applicationName = System.getProperty("project.name");
         }
-
+        Map<String,String> pros = new HashMap<>();
+        if(StringUtils.isBlank(applicationName)){
+           applicationName = "unknow";
+           logger.warn("unknow -DapplicationName ERROR");
+        }
+        pros.put("applicationName",applicationName);
+        heartbeatRequest.getHeader().setProperties(pros);
     }
 
     public void start(final Channel channel, final AtomicBoolean running) {

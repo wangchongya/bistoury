@@ -45,9 +45,9 @@ public class NettyServerForAgent implements NettyServer {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyServerForAgent.class);
 
-    private static final int DEFAULT_WRITE_LOW_WATER_MARK = 64 * 1024;
+    private static final int DEFAULT_WRITE_LOW_WATER_MARK = 128 * 1024;
 
-    private static final int DEFAULT_WRITE_HIGH_WATER_MARK = 128 * 1024;
+    private static final int DEFAULT_WRITE_HIGH_WATER_MARK = 256 * 1024;
 
     private final EventLoopGroup BOSS_GROUP = new NioEventLoopGroup(1, new ThreadFactoryBuilder().setNameFormat("agent-netty-server-boss").build());
 

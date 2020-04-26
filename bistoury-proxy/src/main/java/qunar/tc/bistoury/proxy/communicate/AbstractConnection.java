@@ -20,6 +20,8 @@ package qunar.tc.bistoury.proxy.communicate;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.bistoury.remoting.protocol.Datagram;
@@ -47,19 +49,19 @@ public abstract class AbstractConnection implements Connection {
     @Override
     public ListenableFuture<WriteResult> write(Datagram message) {
         SettableFuture<WriteResult> result = SettableFuture.create();
-        if (channel.isWritable()) {
-            channel.writeAndFlush(message).addListener(future -> {
-                if (future.isSuccess()) {
-                    result.set(WriteResult.success);
-                } else {
-                    logger.warn("{} connection write fail, {}, {}", name, channel, message);
-                    result.set(WriteResult.fail);
-                }
-            });
-        } else {
-            logger.warn("{} connection is not writable, {}, {}", name, channel, message);
-            result.set(WriteResult.fail);
+
+        ChannelFuture future = channel.writeAndFlush(message).addListener(listener -> {
+            if (listener.isSuccess()) {
+                result.set(WriteResult.success);
+            } else {
+                logger.warn("{} connection write fail, {}, {}", name, channel, message);
+                result.set(WriteResult.fail);
+            }
+        });
+        if(!channel.isWritable()){
+            future.awaitUninterruptibly(10);
         }
+
         return result;
     }
 

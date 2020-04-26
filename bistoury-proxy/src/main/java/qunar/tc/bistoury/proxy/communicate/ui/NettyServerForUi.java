@@ -54,9 +54,9 @@ public class NettyServerForUi implements NettyServer {
 
     private static final String RSA_PRIVATE_KEY = "/rsa-private-key.pem";
 
-    private static final int DEFAULT_WRITE_LOW_WATER_MARK = 64 * 1024;
+    private static final int DEFAULT_WRITE_LOW_WATER_MARK = 128 * 1024;
 
-    private static final int DEFAULT_WRITE_HIGH_WATER_MARK = 128 * 1024;
+    private static final int DEFAULT_WRITE_HIGH_WATER_MARK = 256 * 1024;
 
     private static final EventLoopGroup BOSS = new NioEventLoopGroup(1, new ThreadFactoryBuilder().setNameFormat("ui-netty-server-boss").build());
 
