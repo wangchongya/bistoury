@@ -96,8 +96,7 @@ public class NettyServerForUi implements NettyServer {
                 .option(ChannelOption.SO_REUSEADDR, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-                .option(ChannelOption.WRITE_BUFFER_LOW_WATER_MARK, DEFAULT_WRITE_LOW_WATER_MARK)
-                .option(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK, DEFAULT_WRITE_HIGH_WATER_MARK)
+                .option(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(DEFAULT_WRITE_LOW_WATER_MARK,DEFAULT_WRITE_HIGH_WATER_MARK))
                 .channel(NioServerSocketChannel.class)
                 .group(BOSS, WORKER)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
