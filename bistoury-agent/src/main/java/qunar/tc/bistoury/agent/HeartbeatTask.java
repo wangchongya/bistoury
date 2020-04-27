@@ -69,10 +69,15 @@ class HeartbeatTask {
         Map<String,String> pros = new HashMap<>();
         pros.put("applicationName",applicationName);
         pros.put("configEnv",configEnv);
-        InetAddress inetAddress = IPUtils.getLocalIP();
-        if(inetAddress!=null){
-            pros.put("hostname", inetAddress.getHostName());
+        try{
+            InetAddress inetAddress = InetAddress.getLocalHost();
+            if(inetAddress!=null){
+                pros.put("hostname", inetAddress.getHostName());
+            }
+        }catch (Exception ex){
+
         }
+
         heartbeatRequest = RemotingBuilder.buildAgentRequest(ResponseCode.RESP_TYPE_HEARTBEAT.getCode(), new ResponseStringPayloadHolder(JacksonSerializer.serialize(pros)));
     }
 
