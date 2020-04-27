@@ -13,7 +13,6 @@ public class AppUtils {
      * @return
      */
     public static String getAgentAppName(int pid) {
-
         String applicationName = System.getProperty("applicationName");
         if(StringUtils.isBlank(applicationName)){
             applicationName = System.getProperty("project.name");
@@ -37,5 +36,29 @@ public class AppUtils {
             }
         }
         return applicationName;
+    }
+
+    /**
+     * 获取agent应用名
+     * @param pid
+     * @return
+     */
+    public static String getAgentConfigEnv(int pid) {
+        String configEnv = System.getProperty("config_env");
+        if(StringUtils.isBlank(configEnv)){
+            try{
+                VirtualMachineUtil.VMConnector  connect = VirtualMachineUtil.connect(pid);
+                RuntimeMXBean runtimeBean = connect.getRuntimeMXBean();
+                List<String> arguments = runtimeBean.getInputArguments();
+                for(String str:arguments){
+                    if(str.startsWith("-Dconfig_env=") ){
+                        return str.replace("-Dconfig_env=","");
+                    }
+                }
+            }catch (Exception ex){
+
+            }
+        }
+        return configEnv;
     }
 }

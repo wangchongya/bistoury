@@ -24,16 +24,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import qunar.tc.bistoury.common.JacksonSerializer;
 import qunar.tc.bistoury.proxy.communicate.agent.AgentConnectionStore;
 import qunar.tc.bistoury.proxy.communicate.agent.DefaultAgentConnectionStore;
 import qunar.tc.bistoury.proxy.generator.IdGenerator;
 import qunar.tc.bistoury.proxy.generator.SessionIdGenerator;
+import qunar.tc.bistoury.remoting.command.CommandSerializer;
 import qunar.tc.bistoury.remoting.protocol.Datagram;
 import qunar.tc.bistoury.remoting.protocol.RemotingBuilder;
 import qunar.tc.bistoury.remoting.protocol.ResponseCode;
 import qunar.tc.bistoury.remoting.protocol.payloadHolderImpl.RequestPayloadHolder;
+import qunar.tc.bistoury.remoting.util.PayloadHolderUtils;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -59,10 +63,16 @@ public class ProxyHeartbeatProcessor implements AgentMessageProcessor {
 
     @Override
     public void process(ChannelHandlerContext ctx, Datagram message) {
-        logger.debug("receive heartbeat, {}", message);
+        logger.info("receive heartbeat, {}", message);
         String ip = getIp(ctx.channel());
+
+        String content = CommandSerializer.readCommand(message.getBody());
+        Map<String,String> props = JacksonSerializer.deSerialize(content,Map.class);
         message.release();
-        connectionStore.register(ip, message.getHeader().getProperties().get("applicationName"),message.getHeader().getVersion(), ctx.channel());
+
+
+        //Map<String,String> props = message.getHeader().getProperties();
+        connectionStore.register(ip, props,message.getHeader().getVersion(), ctx.channel());
         ctx.channel().writeAndFlush(heartbeatResponse);
     }
 

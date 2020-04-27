@@ -30,12 +30,17 @@ public interface ZKClient {
     void deletePath(String path) throws Exception;
 
     List<String> getChildren(String path) throws Exception;
+    byte[] getValue(String path) throws Exception;
 
     boolean checkExist(String path);
 
     void addPersistentNode(String path) throws Exception;
 
+    void addPersistentNode(String path,String value) throws Exception;
+
     String addEphemeralNode(String path) throws Exception;
+
+    String addEphemeralNode(String path,String value) throws Exception;
 
     void addConnectionChangeListener(ConnectionStateListener listener);
 

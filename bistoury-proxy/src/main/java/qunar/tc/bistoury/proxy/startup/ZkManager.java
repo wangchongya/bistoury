@@ -44,13 +44,18 @@ public class ZkManager {
     }
 
 
+
+    public boolean createOnlyLastEphemeralNode(String path,boolean ephemeral){
+        return createOnlyLastEphemeralNode(path,ephemeral,null);
+    }
+
     /**
      * 创建目前只有最后可选临时节点
      * @param path
      * @param ephemeral
      * @return
      */
-    public boolean createOnlyLastEphemeralNode(String path,boolean ephemeral){
+    public boolean createOnlyLastEphemeralNode(String path,boolean ephemeral,String value){
         try{
             if (checkExist(path)) {
                 return true;
@@ -61,9 +66,9 @@ public class ZkManager {
                 createOnlyLastEphemeralNode(path.substring(0, i), false);
             }
             if(ephemeral){
-                 zkClient.addEphemeralNode(path);
+                 zkClient.addEphemeralNode(path,value);
             }else {
-                 zkClient.addPersistentNode(path);
+                 zkClient.addPersistentNode(path,value);
             }
             return true;
         }catch (Exception e){

@@ -23,6 +23,9 @@ import com.google.common.util.concurrent.MoreExecutors;
 import io.netty.channel.Channel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import qunar.tc.bistoury.application.api.pojo.AppServer;
+import qunar.tc.bistoury.application.mysql.utils.UUIDUtil;
+import qunar.tc.bistoury.common.JacksonSerializer;
 import qunar.tc.bistoury.proxy.startup.ZkManager;
 import qunar.tc.bistoury.serverside.store.RegistryStore;
 
@@ -46,13 +49,18 @@ public class DefaultAgentConnectionStore implements AgentConnectionStore {
     private RegistryStore registryStore;
 
     @Override
-    public AgentConnection register(String agentId,String applicationName, int agentVersion, Channel channel) {
+    public AgentConnection register(String agentId,Map<String,String> prop,int agentVersion, Channel channel) {
+        String applicationName = prop.get("applicationName");
+        String hostname = prop.get("hostname");
+        String configEnv = prop.get("configEnv");
+
         DefaultAgentConnection agentConnection = new DefaultAgentConnection(agentId,applicationName, agentVersion, channel);
         AgentConnection oldConnection = connections.get(agentId);
         if (!Objects.equals(oldConnection, agentConnection)) {
             oldConnection = connections.put(agentId, agentConnection);
             agentConnection.init();
-            zkManager.createOnlyLastEphemeralNode(registryStore.getAgentZkPath() + "/" + applicationName + "/" + agentId,true);
+            AppServer appServer = new AppServer(UUIDUtil.generateUniqueId(),agentId,0,hostname,"/usr/local/yunji/logs",configEnv,applicationName);
+            zkManager.createOnlyLastEphemeralNode(registryStore.getAgentZkPath() + "/" + applicationName + "/" + agentId,true, JacksonSerializer.serialize(appServer));
             agentConnection.closeFuture().addListener(() -> connections.remove(agentId, agentConnection), MoreExecutors.directExecutor());
             if (oldConnection != null && !Objects.equals(oldConnection, agentConnection)) {
                 oldConnection.close();

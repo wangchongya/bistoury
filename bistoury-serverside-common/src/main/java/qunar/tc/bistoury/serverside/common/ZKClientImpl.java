@@ -27,7 +27,9 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -57,9 +59,18 @@ public class ZKClientImpl implements ZKClient {
 
     @Override
     public List<String> getChildren(String path) throws Exception {
-        return client.getChildren().forPath(path);
+        try{
+            return client.getChildren().forPath(path);
+        }catch (Exception ex){
+
+        }
+       return Collections.EMPTY_LIST;
     }
 
+    @Override
+    public byte[] getValue(String path) throws Exception{
+        return client.getData().forPath(path);
+    }
     @Override
     public boolean checkExist(String path) {
         try {
@@ -73,11 +84,24 @@ public class ZKClientImpl implements ZKClient {
 
     @Override
     public void addPersistentNode(String path) throws Exception {
+        addPersistentNode(path,null);
+    }
+
+    @Override
+    public void addPersistentNode(String path,String value) throws Exception {
         try {
-            client.create()
-                    .creatingParentsIfNeeded()
-                    .withMode(CreateMode.PERSISTENT)
-                    .forPath(path);
+            if(StringUtils.isEmpty(value)){
+                client.create()
+                        .creatingParentsIfNeeded()
+                        .withMode(CreateMode.PERSISTENT)
+                        .forPath(path);
+            }else{
+                client.create()
+                        .creatingParentsIfNeeded()
+                        .withMode(CreateMode.PERSISTENT)
+                        .forPath(path,value.getBytes());
+            }
+
         } catch (KeeperException.NodeExistsException e) {
             logger.warn("Node already exists: {}", path);
         } catch (Exception e) {
@@ -87,7 +111,16 @@ public class ZKClientImpl implements ZKClient {
 
     @Override
     public String addEphemeralNode(String path) throws Exception {
-        return client.create().withMode(CreateMode.EPHEMERAL).forPath(path);
+        return addEphemeralNode(path,null);
+    }
+
+    @Override
+    public String addEphemeralNode(String path,String value) throws Exception {
+        if(StringUtils.isEmpty(value)){
+           return client.create().withMode(CreateMode.EPHEMERAL).forPath(path);
+        }else{
+           return client.create().withMode(CreateMode.EPHEMERAL).forPath(path,value.getBytes());
+        }
     }
 
     @Override

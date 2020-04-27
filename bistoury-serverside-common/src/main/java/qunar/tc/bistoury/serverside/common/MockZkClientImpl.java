@@ -60,12 +60,27 @@ public class MockZkClientImpl implements ZKClient {
     }
 
     @Override
+    public byte[] getValue(String path) throws Exception{
+        return null;
+    }
+    @Override
     public void addPersistentNode(String path) throws Exception {
         logger.info("zk mock\t add persistent node, path: {}", path);
     }
 
     @Override
+    public void addPersistentNode(String path,String value) throws Exception {
+        logger.info("zk mock\t add persistent node, path: {}", path);
+    }
+
+    @Override
     public String addEphemeralNode(String path) throws Exception {
+        logger.info("zk mock\t add ephemeral node, path: {}", path);
+        return path;
+    }
+
+    @Override
+    public String addEphemeralNode(String path,String value) throws Exception {
         logger.info("zk mock\t add ephemeral node, path: {}", path);
         return path;
     }

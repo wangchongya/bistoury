@@ -23,13 +23,13 @@ package qunar.tc.bistoury.application.api.pojo;
  * @describe
  */
 public class AppServer {
-    private String serverId;
+    private String serverId;//UUID生成
     private String ip;
     private int port;
     private String host;
-    private String logDir;
-    private String room;
-    private String appCode;
+    private String logDir;//日志目录
+    private String room;//机房
+    private String appCode;//应用名
     private boolean autoJStackEnable = false;
     private boolean autoJMapHistoEnable = false;
 

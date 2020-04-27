@@ -26,11 +26,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.bistoury.agent.common.pid.PidUtils;
 import qunar.tc.bistoury.commands.host.AppUtils;
+import qunar.tc.bistoury.common.IPUtils;
+import qunar.tc.bistoury.common.JacksonSerializer;
 import qunar.tc.bistoury.common.NamedThreadFactory;
 import qunar.tc.bistoury.remoting.protocol.Datagram;
 import qunar.tc.bistoury.remoting.protocol.RemotingBuilder;
 import qunar.tc.bistoury.remoting.protocol.ResponseCode;
+import qunar.tc.bistoury.remoting.protocol.payloadHolderImpl.ResponseStringPayloadHolder;
 
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -53,16 +57,23 @@ class HeartbeatTask {
 
     public HeartbeatTask(long heartbeatSec) {
         this.heartbeatSec = heartbeatSec;
-        heartbeatRequest = RemotingBuilder.buildAgentRequest(ResponseCode.RESP_TYPE_HEARTBEAT.getCode(), null);
 
-        String applicationName = AppUtils.getAgentAppName(PidUtils.getPid());
+
+        int pid = PidUtils.getPid();
+        String applicationName = AppUtils.getAgentAppName(pid);
         if(StringUtils.isBlank(applicationName)){
            applicationName = "unknow";
            logger.warn("unknow -DapplicationName ERROR");
         }
+        String configEnv = AppUtils.getAgentConfigEnv(pid);
         Map<String,String> pros = new HashMap<>();
         pros.put("applicationName",applicationName);
-        heartbeatRequest.getHeader().setProperties(pros);
+        pros.put("configEnv",configEnv);
+        InetAddress inetAddress = IPUtils.getLocalIP();
+        if(inetAddress!=null){
+            pros.put("hostname", inetAddress.getHostName());
+        }
+        heartbeatRequest = RemotingBuilder.buildAgentRequest(ResponseCode.RESP_TYPE_HEARTBEAT.getCode(), new ResponseStringPayloadHolder(JacksonSerializer.serialize(pros)));
     }
 
     public void start(final Channel channel, final AtomicBoolean running) {

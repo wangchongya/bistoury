@@ -3,6 +3,8 @@ package qunar.tc.bistoury.ui.service.impl;
 import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import qunar.tc.bistoury.application.api.pojo.AppServer;
+import qunar.tc.bistoury.common.JacksonSerializer;
 import qunar.tc.bistoury.serverside.common.ZKClient;
 import qunar.tc.bistoury.serverside.common.ZKClientCache;
 import qunar.tc.bistoury.serverside.store.RegistryStore;
@@ -11,6 +13,7 @@ import qunar.tc.bistoury.ui.service.AgentService;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AgentServiceImpl implements AgentService {
@@ -45,12 +48,24 @@ public class AgentServiceImpl implements AgentService {
     }
 
     @Override
-    public List<String> getAppAgents(String applicationName) {
+    public List<AppServer> getAppServerByAppCode(String appCode){
+        List<AppServer> appServers = new ArrayList<>();
         try {
-            return zkClient.getChildren(registryStore.getAgentZkPath() + "/" + applicationName);
+            String parentPath = registryStore.getAgentZkPath() + "/" + appCode;
+            List<String> childrens =  zkClient.getChildren(parentPath);
+            if(childrens!=null && !childrens.isEmpty()){
+                for(String str:childrens){
+                    byte[] value = zkClient.getValue(parentPath + "/" + str);
+                    if(value!=null && value.length > 0){
+                        appServers.add(JacksonSerializer.deSerialize(value,AppServer.class));
+                    }
+                }
+                return appServers;
+            }
         } catch (Exception e) {
             logger.error("get all proxy server address error", e);
             return ImmutableList.of();
         }
+        return appServers;
     }
 }

@@ -19,6 +19,7 @@ package qunar.tc.bistoury.application.mysql.service;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,15 @@ import qunar.tc.bistoury.application.api.AppServerService;
 import qunar.tc.bistoury.application.api.pojo.AppServer;
 import qunar.tc.bistoury.application.mysql.dao.AppServerDao;
 import qunar.tc.bistoury.application.mysql.utils.UUIDUtil;
+import qunar.tc.bistoury.common.JacksonSerializer;
+import qunar.tc.bistoury.serverside.common.ZKClient;
+import qunar.tc.bistoury.serverside.common.ZKClientCache;
+import qunar.tc.bistoury.serverside.store.RegistryStore;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -44,15 +53,53 @@ public class AppServerServiceImpl implements AppServerService {
     @Autowired
     private AppServerDao appServerDao;
 
+    @Resource
+    private RegistryStore registryStore;
 
+    private ZKClient zkClient;
+
+
+
+    @PostConstruct
+    public void init() {
+        zkClient = ZKClientCache.get(registryStore.getZkAddress());
+    }
+
+
+    @PreDestroy
+    public void stop(){
+        zkClient.close();
+    }
 
 
     @Override
     public List<AppServer> getAppServerByAppCode(final String appCode) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(appCode), "app code cannot be null or empty");
-        //得到zk下所有 /bistoury/agent/${appCode} 节点
 
-        return this.appServerDao.getAppServerByAppCode(appCode);
+       // return this.appServerDao.getAppServerByAppCode(appCode);
+        return getAppServerByAppCodeFromAgent(appCode);
+    }
+
+
+    private List<AppServer> getAppServerByAppCodeFromAgent(String appCode){
+        List<AppServer> appServers = new ArrayList<>();
+        try {
+            String parentPath = registryStore.getAgentZkPath() + "/" + appCode;
+            List<String> childrens =  zkClient.getChildren(parentPath);
+            if(childrens!=null && !childrens.isEmpty()){
+                for(String str:childrens){
+                    byte[] value = zkClient.getValue(parentPath + "/" + str);
+                    if(value!=null && value.length > 0){
+                        appServers.add(JacksonSerializer.deSerialize(value,AppServer.class));
+                    }
+                }
+                return appServers;
+            }
+        } catch (Exception e) {
+            logger.error("get all proxy server address error", e);
+            return ImmutableList.of();
+        }
+        return appServers;
     }
 
     @Override
