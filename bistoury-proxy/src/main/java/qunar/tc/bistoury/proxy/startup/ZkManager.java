@@ -93,9 +93,7 @@ public class ZkManager {
 
     public String doRegister(String basePath, String node) {
         try {
-            if (!zkClient.checkExist(basePath)) {
-                createOnlyLastEphemeralNode(basePath,true);
-            }
+            createOnlyLastEphemeralNode(basePath,false);
             node = ZKPaths.makePath(basePath, node);
             deleteNode(node);
             zkClient.addEphemeralNode(node);

@@ -29,6 +29,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameAggregator;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,7 +107,8 @@ public class NettyServerForUi implements NettyServer {
                         pip.addLast(new IdleStateHandler(0, 0, 30 * 60 * 1000))
                                 .addLast(new HttpServerCodec())
                                 .addLast(new HttpObjectAggregator(1024 * 1024))
-                                .addLast(new WebSocketServerProtocolHandler("/ws"))
+                                .addLast(new WebSocketServerCompressionHandler())
+                                .addLast(new WebSocketServerProtocolHandler("/ws", null, true))
                                 .addLast(new WebSocketFrameAggregator(1024 * 1024 * 1024))
                                 .addLast(new RequestDecoder(new DefaultRequestEncryption(new RSAEncryption(RSA_PUBLIC_KEY, RSA_PRIVATE_KEY))))
                                 .addLast(new WebSocketEncoder())

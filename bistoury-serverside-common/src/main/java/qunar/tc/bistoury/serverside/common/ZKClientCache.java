@@ -52,9 +52,9 @@ public class ZKClientCache {
 
 
     private static ZKClient getZkClient(final String address) {
-        if (isLocal()) {
-            return new MockZkClientImpl(LOCAL_ZK_TAG_FILE);
-        }
+//        if (isLocal()) {
+//            return new MockZkClientImpl(LOCAL_ZK_TAG_FILE);
+//        }
         return new ZKClientImpl(address);
     }
 

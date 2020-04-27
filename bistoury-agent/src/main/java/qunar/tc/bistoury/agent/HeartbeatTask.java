@@ -24,6 +24,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import qunar.tc.bistoury.agent.common.pid.PidUtils;
+import qunar.tc.bistoury.commands.host.AppUtils;
 import qunar.tc.bistoury.common.NamedThreadFactory;
 import qunar.tc.bistoury.remoting.protocol.Datagram;
 import qunar.tc.bistoury.remoting.protocol.RemotingBuilder;
@@ -53,15 +55,12 @@ class HeartbeatTask {
         this.heartbeatSec = heartbeatSec;
         heartbeatRequest = RemotingBuilder.buildAgentRequest(ResponseCode.RESP_TYPE_HEARTBEAT.getCode(), null);
 
-        String applicationName = System.getProperty("applicationName");
-        if(StringUtils.isBlank(applicationName)){
-            applicationName = System.getProperty("project.name");
-        }
-        Map<String,String> pros = new HashMap<>();
+        String applicationName = AppUtils.getAgentAppName(PidUtils.getPid());
         if(StringUtils.isBlank(applicationName)){
            applicationName = "unknow";
            logger.warn("unknow -DapplicationName ERROR");
         }
+        Map<String,String> pros = new HashMap<>();
         pros.put("applicationName",applicationName);
         heartbeatRequest.getHeader().setProperties(pros);
     }
