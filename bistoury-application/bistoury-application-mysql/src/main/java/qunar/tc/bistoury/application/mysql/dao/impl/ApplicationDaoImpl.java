@@ -53,6 +53,9 @@ public class ApplicationDaoImpl implements ApplicationDao {
     private static final String CHECK_EXIST_SQL = "SELECT code FROM bistoury_app WHERE code = ?";
 
     private static final String UPDATE_APP = "UPDATE bistoury_app SET name = ?, group_code=?,status=? WHERE code = ? ";
+
+    private static final String DELETE_APP = "DELETE bistoury_app  WHERE code = ? limit 1 ";
+
     private static ResultSetExtractor<Application> APPLICATION_MAPPER = resultSet -> {
         if (resultSet.next()) {
             return getApplicationFromRs(resultSet);
@@ -116,5 +119,10 @@ public class ApplicationDaoImpl implements ApplicationDao {
     public boolean checkExist(String appCode) {
         String result = jdbcTemplate.query(CHECK_EXIST_SQL, CODE_MAPPER, appCode);
         return result != null;
+    }
+
+    @Override
+    public int deleteApplicationByServerId(String appCode) {
+        return jdbcTemplate.update(UPDATE_APP, appCode);
     }
 }

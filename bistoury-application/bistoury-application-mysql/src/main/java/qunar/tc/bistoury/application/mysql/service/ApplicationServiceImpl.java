@@ -25,7 +25,7 @@ import org.springframework.util.CollectionUtils;
  * @since 2019/8/14
  */
 @Service
-public class ApplicationServiceImpl implements ApplicationService {
+public class ApplicationServiceImpl implements ApplicationService  {
 
 	@Autowired
 	private ApplicationDao applicationDao;
@@ -97,6 +97,18 @@ public class ApplicationServiceImpl implements ApplicationService {
 			this.applicationUserDao.batchAddAppUser(newOwners, appCode);
 			return this.applicationDao.updateApplication(application);
 		}
+	}
+
+	@Override
+	public int deleteApplicationByServerId(String appCode, String loginUser) {
+		Preconditions.checkArgument(!Strings.isNullOrEmpty(appCode), "app code cannot be null or empty");
+
+		Application application = this.applicationDao.getApplicationByAppCode(appCode);
+		Preconditions.checkArgument(application==null, "app code be null or empty");
+		Preconditions.checkArgument(!CollectionUtils.isEmpty(application.getOwner()), "owner cannot be null or empty");
+
+		int result = this.applicationDao.deleteApplicationByServerId(appCode);
+		return result;
 	}
 
 	private boolean verification(Application application, String loginUser, boolean admin) {

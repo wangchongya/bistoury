@@ -38,4 +38,6 @@ public interface ApplicationDao {
     List<Application> getAllApplications();
 
     boolean checkExist(String appCode);
+
+    int deleteApplicationByServerId(String appCode);
 }

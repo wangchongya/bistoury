@@ -20,6 +20,7 @@ package qunar.tc.bistoury.application.mysql.service;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,8 +84,9 @@ public class AppServerServiceImpl implements AppServerService {
 
     private List<AppServer> getAppServerByAppCodeFromAgent(String appCode){
         List<AppServer> appServers = new ArrayList<>();
+        String parentPath = registryStore.getAgentZkPath() + "/" + appCode;
         try {
-            String parentPath = registryStore.getAgentZkPath() + "/" + appCode;
+
             List<String> childrens =  zkClient.getChildren(parentPath);
             if(childrens!=null && !childrens.isEmpty()){
                 for(String str:childrens){
@@ -95,8 +97,10 @@ public class AppServerServiceImpl implements AppServerService {
                 }
                 return appServers;
             }
-        } catch (Exception e) {
-            logger.error("get all proxy server address error", e);
+        }catch (KeeperException.NoNodeException ex){
+            logger.error("getAppServerByAppCodeFromAgent error zk node :{} not exist",parentPath);
+        } catch(Exception e) {
+            logger.error("getAppServerByAppCodeFromAgent error", e);
             return ImmutableList.of();
         }
         return appServers;

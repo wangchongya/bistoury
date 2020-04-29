@@ -61,10 +61,13 @@ public class DefaultAgentConnectionStore implements AgentConnectionStore {
             agentConnection.init();
             AppServer appServer = new AppServer(UUIDUtil.generateUniqueId(),agentId,0,hostname,"/usr/local/yunji/logs",configEnv,applicationName);
             zkManager.createOnlyLastEphemeralNode(registryStore.getAgentZkPath() + "/" + applicationName + "/" + agentId,true, JacksonSerializer.serialize(appServer));
-            agentConnection.closeFuture().addListener(() -> connections.remove(agentId, agentConnection), MoreExecutors.directExecutor());
+            agentConnection.closeFuture().addListener(() -> {
+                connections.remove(agentId, agentConnection);
+                zkManager.deleteNode(registryStore.getAgentZkPath() + "/" + applicationName + "/" + agentId );
+             }
+            , MoreExecutors.directExecutor());
             if (oldConnection != null && !Objects.equals(oldConnection, agentConnection)) {
                 oldConnection.close();
-                zkManager.deleteNode(registryStore.getAgentZkPath() + "/" + applicationName + "/" + agentId );
             }
             return agentConnection;
         } else {
