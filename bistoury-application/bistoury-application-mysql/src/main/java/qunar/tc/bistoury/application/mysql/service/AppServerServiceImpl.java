@@ -72,13 +72,20 @@ public class AppServerServiceImpl implements AppServerService {
         zkClient.close();
     }
 
+    /**
+     * 是否开启zknode管理模式
+     */
+    private boolean enableZkNode = true;
+
 
     @Override
     public List<AppServer> getAppServerByAppCode(final String appCode) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(appCode), "app code cannot be null or empty");
 
-       // return this.appServerDao.getAppServerByAppCode(appCode);
-        return getAppServerByAppCodeFromAgent(appCode);
+        if(enableZkNode){
+            return getAppServerByAppCodeFromAgent(appCode);
+        }
+        return this.appServerDao.getAppServerByAppCode(appCode);
     }
 
 
@@ -124,6 +131,9 @@ public class AppServerServiceImpl implements AppServerService {
     public int deleteAppServerByServerId(final String serverId, String loginUser) {
         Preconditions.checkArgument(!Strings.isNullOrEmpty(serverId), "serverId cannot be null or empty");
         logger.info("{} delete a server, serverId: {}", loginUser, serverId);
+        if(enableZkNode){
+            return 0;//只模式下不支持删除
+        }
         return this.appServerDao.deleteAppServerByServerId(serverId);
     }
 
