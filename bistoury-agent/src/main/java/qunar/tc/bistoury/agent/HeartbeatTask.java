@@ -33,6 +33,8 @@ import qunar.tc.bistoury.remoting.protocol.Datagram;
 import qunar.tc.bistoury.remoting.protocol.RemotingBuilder;
 import qunar.tc.bistoury.remoting.protocol.ResponseCode;
 import qunar.tc.bistoury.remoting.protocol.payloadHolderImpl.ResponseStringPayloadHolder;
+import qunar.tc.bistoury.remoting.util.LocalHost;
+
 
 import java.net.InetAddress;
 import java.util.HashMap;
@@ -57,8 +59,6 @@ class HeartbeatTask {
 
     public HeartbeatTask(long heartbeatSec) {
         this.heartbeatSec = heartbeatSec;
-
-
         int pid = PidUtils.getPid();
         String applicationName = AppUtils.getAgentAppName(pid);
         if(StringUtils.isBlank(applicationName)){
@@ -79,6 +79,7 @@ class HeartbeatTask {
         }
 
         heartbeatRequest = RemotingBuilder.buildAgentRequest(ResponseCode.RESP_TYPE_HEARTBEAT.getCode(), new ResponseStringPayloadHolder(JacksonSerializer.serialize(pros)));
+
     }
 
     public void start(final Channel channel, final AtomicBoolean running) {

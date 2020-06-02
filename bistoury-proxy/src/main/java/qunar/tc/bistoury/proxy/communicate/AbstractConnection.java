@@ -49,7 +49,6 @@ public abstract class AbstractConnection implements Connection {
     @Override
     public ListenableFuture<WriteResult> write(Datagram message) {
         SettableFuture<WriteResult> result = SettableFuture.create();
-
         ChannelFuture future = channel.writeAndFlush(message).addListener(listener -> {
             if (listener.isSuccess()) {
                 result.set(WriteResult.success);
@@ -63,6 +62,16 @@ public abstract class AbstractConnection implements Connection {
         }
 
         return result;
+    }
+
+    @Override
+    public boolean isActive() {
+        return channel.isActive();
+    }
+
+    @Override
+    public boolean isWritable() {
+        return channel.isWritable();
     }
 
     @Override
