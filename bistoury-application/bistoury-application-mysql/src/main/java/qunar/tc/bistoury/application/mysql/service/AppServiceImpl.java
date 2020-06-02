@@ -26,6 +26,7 @@ import qunar.tc.bistoury.application.api.pojo.Application;
 import qunar.tc.bistoury.application.mysql.dao.ApplicationDao;
 import qunar.tc.bistoury.application.mysql.dao.ApplicationUserDao;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -44,7 +45,7 @@ public class AppServiceImpl implements AppService {
     @Override
     public Set<String> getApps(String userCode) {
         List<String> appCodes = this.applicationUserDao.getAppCodesByUserCode(userCode);
-        return Sets.newHashSet(appCodes);
+        return Sets.newTreeSet(appCodes);//newHashSet改成排序的
     }
 
     @Override
