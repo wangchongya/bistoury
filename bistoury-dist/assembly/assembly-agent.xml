@@ -16,7 +16,7 @@
                 <include>bin/**</include>
             </includes>
             <fileMode>0755</fileMode>
-            <lineEnding>keep</lineEnding>
+            <lineEnding>unix</lineEnding>
         </fileSet>
     </fileSets>
 
