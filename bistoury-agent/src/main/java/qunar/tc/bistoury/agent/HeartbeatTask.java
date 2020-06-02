@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import qunar.tc.bistoury.agent.common.pid.PidUtils;
 import qunar.tc.bistoury.commands.host.AppUtils;
-import qunar.tc.bistoury.common.IPUtils;
 import qunar.tc.bistoury.common.JacksonSerializer;
 import qunar.tc.bistoury.common.NamedThreadFactory;
 import qunar.tc.bistoury.remoting.protocol.Datagram;
@@ -35,8 +34,6 @@ import qunar.tc.bistoury.remoting.protocol.ResponseCode;
 import qunar.tc.bistoury.remoting.protocol.payloadHolderImpl.ResponseStringPayloadHolder;
 import qunar.tc.bistoury.remoting.util.LocalHost;
 
-
-import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -69,14 +66,8 @@ class HeartbeatTask {
         Map<String,String> pros = new HashMap<>();
         pros.put("applicationName",applicationName);
         pros.put("configEnv",configEnv);
-        try{
-            InetAddress inetAddress = InetAddress.getLocalHost();
-            if(inetAddress!=null){
-                pros.put("hostname", inetAddress.getHostName());
-            }
-        }catch (Exception ex){
-
-        }
+        pros.put("hostname", LocalHost.getHostName());
+        pros.put("ip",LocalHost.getLocalHost());
 
         heartbeatRequest = RemotingBuilder.buildAgentRequest(ResponseCode.RESP_TYPE_HEARTBEAT.getCode(), new ResponseStringPayloadHolder(JacksonSerializer.serialize(pros)));
 
