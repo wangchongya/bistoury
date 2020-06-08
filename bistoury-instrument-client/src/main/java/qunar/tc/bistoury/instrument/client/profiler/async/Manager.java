@@ -25,12 +25,16 @@ public class Manager {
         File jarFile = new File(Manager.class.getProtectionDomain().getCodeSource().getLocation().getPath());
         File rootPath = new File(jarFile.getParentFile().getParentFile(), "bin" + File.separator + "async-profiler");
         String libName = "";
-        if (OsUtils.isLinux()) {
-            libName = "async-profiler-1.6-linux-x64.so";
-        }
         if (OsUtils.isMac()) {
-            libName = "async-profiler-1.6-macos-x64.so";
+            libName = "libasyncProfiler-mac-x64.so";
         }
+        if (OsUtils.isLinux()) {
+            libName = "libasyncProfiler-linux-x64.so";
+            if (OsUtils.isArm()) {
+                libName = "libasyncProfiler-linux-arm.so";
+            }
+        }
+
         profilerLibPath = new File(rootPath, libName).getAbsolutePath();
         logger.info("", "async profiler lib path: {}", profilerLibPath);
         try {

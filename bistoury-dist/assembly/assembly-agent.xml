@@ -13,10 +13,17 @@
     <fileSets>
         <fileSet>
             <includes>
-                <include>bin/**</include>
+                <include>bin/*.sh</include>
             </includes>
             <fileMode>0755</fileMode>
             <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
+            <includes>
+                <include>bin/async-profiler/*</include>
+            </includes>
+            <fileMode>0755</fileMode>
+            <lineEnding>keep</lineEnding>
         </fileSet>
     </fileSets>
 

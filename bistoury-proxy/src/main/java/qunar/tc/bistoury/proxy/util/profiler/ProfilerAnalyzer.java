@@ -88,7 +88,7 @@ public class ProfilerAnalyzer {
         }
     }
 
-    private static final String javaMethodTag = "//";
+    private static final String javaMethodTag = "/";
 
     private void doParseFile(String profilerId) throws IOException {
         Optional<File> rootDir = ProfilerUtil.getProfilerDir(preAnalyzePath, profilerId);
@@ -103,6 +103,32 @@ public class ProfilerAnalyzer {
                     .collect(Collectors.toList()));
             parseHotMethod(sourceFile, javaCompactMethod, this::getCompactStack);
         }
+    }
+
+    public void aaa(){
+        try{
+            File sourceFile = new File("d:/async.collapsed");
+            File javaMethod = new File(sourceFile.getParent(), JavaHotMethodFile);
+
+            File hotMethod = new File(sourceFile.getParent(), hotMethodFile);
+            File javaCompactMethod = new File(sourceFile.getParent(), JavaHotMethodCompactFile);
+            parseHotMethod(sourceFile, hotMethod, stack -> stack);
+            parseHotMethod(sourceFile, javaMethod, stack -> stack.stream()
+                    .filter(this::isJavaMethod)
+                    .collect(Collectors.toList()));
+            parseHotMethod(sourceFile, javaCompactMethod, this::getCompactStack);
+        } catch (Exception ex){
+            ex.printStackTrace();
+        }
+
+
+    }
+
+
+    public static void main(String[] args) {
+        ProfilerAnalyzer profilerAnalyzer = new ProfilerAnalyzer();
+        profilerAnalyzer.aaa();
+
     }
 
     private List<String> getCompactStack(List<String> stack) {
