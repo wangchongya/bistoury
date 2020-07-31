@@ -197,7 +197,7 @@ public class JarDebugClient implements InstrumentClient {
             if (isJarFile(url)) {
                 final CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
                 String path;
-                if (codeSource == null || Strings.isNullOrEmpty(path = URLDecoder.decode(codeSource.getLocation().getPath(), "utf-8"))) {
+                if (codeSource == null || codeSource.getLocation()==null || Strings.isNullOrEmpty(path = URLDecoder.decode(codeSource.getLocation().getPath(), "utf-8"))) {
                     return classInfo;
                 }
 
