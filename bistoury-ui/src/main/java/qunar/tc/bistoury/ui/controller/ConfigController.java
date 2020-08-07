@@ -18,15 +18,20 @@
 package qunar.tc.bistoury.ui.controller;
 
 import com.google.common.base.Strings;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import qunar.tc.bistoury.serverside.bean.ApiResult;
+import qunar.tc.bistoury.serverside.configuration.DynamicConfig;
+import qunar.tc.bistoury.serverside.configuration.DynamicConfigLoader;
+import qunar.tc.bistoury.serverside.configuration.local.LocalDynamicConfig;
 import qunar.tc.bistoury.serverside.util.ResultHelper;
 import qunar.tc.bistoury.ui.service.ProxyService;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Random;
@@ -40,6 +45,14 @@ public class ConfigController {
     @Resource
     private ProxyService proxyService;
 
+    private String proxyWebSocket;
+
+    @PostConstruct
+    public void init() {
+        DynamicConfig<LocalDynamicConfig> dynamicConfig = DynamicConfigLoader.load("config.properties");
+        proxyWebSocket = dynamicConfig.getString("agent.proxy.domain","");
+    }
+
     @RequestMapping("getProxyWebSocketUrl")
     @ResponseBody
     public ApiResult getProxyWebSocketUrl(@RequestParam String agentIp) {
@@ -51,7 +64,8 @@ public class ConfigController {
 
         if (!result.isEmpty()) {
             //status 为100是new proxy, 0是old proxy
-            return ResultHelper.success(100, "new proxy", result.get(random.nextInt(result.size())));
+//            return ResultHelper.success(100, "new proxy", result.get(random.nextInt(result.size())));
+            return ResultHelper.success(100, "new proxy", StringUtils.isNotBlank(proxyWebSocket)?proxyWebSocket:result.get(random.nextInt(result.size())));
         } else {
             return ResultHelper.fail(1, "no proxy for agent");
         }
