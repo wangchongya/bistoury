@@ -70,7 +70,8 @@ $(document).ready(function () {
             "stop",
             "profilerstart",
             "profilerstop",
-            "profilersearch"
+            "profilersearch",
+            "help"
         ];
 
         var debugCommand = [
@@ -955,6 +956,8 @@ $(document).ready(function () {
                     //8+1+4+4
                     content = Utf8ArrayToStr(new Uint8Array(data.slice(17, 17 + len)));
                 }
+                //不知道啥原因arthas命令带了[arthas]@id$,临时处理办法正则替换
+                //content = content.replace(/\[arthas@\d+\]\$/,'');
                 //                    var log = 'id: ' + id + ',type: ' + type + ',ip: ' + ip + ',content:\n' + content;
                 //                    console.log("recv: " + log);
                 var line = "------------------";

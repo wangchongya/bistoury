@@ -71,7 +71,7 @@ public class ProxyHeartbeatProcessor implements AgentMessageProcessor {
 
     @Override
     public void process(ChannelHandlerContext ctx, Datagram message) {
-        logger.info("receive heartbeat, {}", message);
+        logger.debug("receive heartbeat, {}", message);
         String content = CommandSerializer.readCommand(message.getBody());
         Map<String,String> props = JacksonSerializer.deSerialize(content,Map.class);
         message.release();

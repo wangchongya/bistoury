@@ -20,6 +20,13 @@
         </fileSet>
         <fileSet>
             <includes>
+                <include>bin/inputrc</include>
+            </includes>
+            <fileMode>0755</fileMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+        <fileSet>
+            <includes>
                 <include>bin/async-profiler/*</include>
             </includes>
             <fileMode>0755</fileMode>

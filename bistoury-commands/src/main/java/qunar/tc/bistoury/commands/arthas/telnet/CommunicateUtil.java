@@ -11,7 +11,7 @@ public class CommunicateUtil {
 
     public static final int MIN_PID_LENGTH = 1;
 
-    public static final int MAX_PID_LENGTH = 5;
+    public static final int MAX_PID_LENGTH = 6;
 
     public static final int MIN_PROMPT_LENGTH = PROMPT_PREFIX.length + MIN_PID_LENGTH + PROMPT_SUFFIX.length;
 

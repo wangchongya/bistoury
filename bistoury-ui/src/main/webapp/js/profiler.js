@@ -22,7 +22,7 @@ var sampler_code = "1";
 
 var globalProfilerState;
 
-var currentHost = getCurrentHost();
+var currentHost ;
 
 function startProfiler() {
     var duration = $("#profiler-duration").val();

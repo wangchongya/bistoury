@@ -72,6 +72,7 @@
                 bistoury.result += content;
                 return false;
             } else {
+                //bistoury.result=bistoury.result.replace(/\[arthas@\d+\]\$/,'');
                 func.call(this, bistoury.result, type);
                 bistoury.result = "";
                 return true;

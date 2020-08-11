@@ -132,8 +132,13 @@ public class RemotingHeader {
     @Override
     public String toString() {
         return "RemotingHeader{" +
-                "id='" + id + '\'' +
+                "magicCode=" + magicCode +
+                ", version=" + version +
+                ", agentVersion=" + agentVersion +
+                ", id='" + id + '\'' +
                 ", code=" + code +
+                ", flag=" + flag +
+                ", properties=" + properties +
                 '}';
     }
 }
